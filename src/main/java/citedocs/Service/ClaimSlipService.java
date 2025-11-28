@@ -1,61 +1,50 @@
 package citedocs.Service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import citedocs.Entity.ClaimSlipEntity;
+import citedocs.Exception.ResourceNotFoundException;
 import citedocs.Repository.ClaimSlipRepository;
 
 @Service
+@Transactional
 public class ClaimSlipService {
 
-    @Autowired
-    private ClaimSlipRepository crepo;
+    private final ClaimSlipRepository claimSlipRepository;
 
-    public ClaimSlipService(ClaimSlipRepository crepo) {
-        this.crepo = crepo;
+    public ClaimSlipService(ClaimSlipRepository claimSlipRepository) {
+        this.claimSlipRepository = claimSlipRepository;
     }
 
-    // C
-    public ClaimSlipEntity postClaimSlip(ClaimSlipEntity claimSlip) {
-        return crepo.save(claimSlip);
+    public ClaimSlipEntity create(ClaimSlipEntity entity) {
+        return claimSlipRepository.save(entity);
     }
 
-    // R
-    public List<ClaimSlipEntity> getAllClaimSlips() {
-        return crepo.findAll();
+    @Transactional(readOnly = true)
+    public List<ClaimSlipEntity> findAll() {
+        return claimSlipRepository.findAll();
     }
 
-    // U
-    @SuppressWarnings("finally")
-    public ClaimSlipEntity updateClaimSlip(int cid, ClaimSlipEntity newDetails) {
-        ClaimSlipEntity claimSlip = new ClaimSlipEntity();
-
-        try {
-            claimSlip = crepo.findById(cid)
-                .orElseThrow(() -> new NoSuchElementException("Claim Slip " + cid + " does not exist!"));
-
-            claimSlip.setClaimNumber(newDetails.getClaimNumber());
-            claimSlip.setDateReady(newDetails.getDateReady());
-            claimSlip.setIssuedAt(newDetails.getIssuedAt());
-
-        } catch (NoSuchElementException e) {
-            throw e;
-        } finally {
-            return crepo.save(claimSlip);
-        }
+    @Transactional(readOnly = true)
+    public ClaimSlipEntity findById(int id) {
+        return claimSlipRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ClaimSlip", "id", id));
     }
 
-    // D
-    public String deleteClaimSlip(int cid) {
-        if (crepo.existsById(cid)) {
-            crepo.deleteById(cid);
-            return "Claim Slip " + cid + " is successfully deleted!";
-        } else {
-            return "Claim Slip " + cid + " does not exist!";
-        }
+    public ClaimSlipEntity update(int id, ClaimSlipEntity payload) {
+        ClaimSlipEntity existing = findById(id);
+        existing.setClaimNumber(payload.getClaimNumber());
+        existing.setDateReady(payload.getDateReady());
+        existing.setIssuedBy(payload.getIssuedBy());
+        existing.setIssuedAt(payload.getIssuedAt());
+        return claimSlipRepository.save(existing);
+    }
+
+    public void delete(int id) {
+        ClaimSlipEntity existing = findById(id);
+        claimSlipRepository.delete(existing);
     }
 }

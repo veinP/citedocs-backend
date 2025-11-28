@@ -11,16 +11,16 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "Payments")
+@Table(name = "payments")
 public class PaymentEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "payment_id")
-    private int pid;
+    private int paymentId;
 
     @Column(name = "request_id", nullable = false)
-    private int rid;
+    private Long requestId;
 
     @Column(name = "proof_of_payment", nullable = false)
     private String proofOfPayment;
@@ -31,24 +31,25 @@ public class PaymentEntity {
     @Column(name = "uploaded_at", nullable = false, updatable = false)
     private LocalDateTime uploadedAt;
 
-    public PaymentEntity() {}
-
     @PrePersist
     protected void onUpload() {
         this.uploadedAt = LocalDateTime.now();
     }
 
-    
-    public int getPayment_id() {
-        return pid;
+    public int getPaymentId() {
+        return paymentId;
     }
 
-    public int getRid() {
-        return rid;
+    public void setPaymentId(int paymentId) {
+        this.paymentId = paymentId;
     }
 
-    public void setRid(int rid) {
-        this.rid = rid;
+    public Long getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(Long requestId) {
+        this.requestId = requestId;
     }
 
     public String getProofOfPayment() {

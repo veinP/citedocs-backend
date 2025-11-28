@@ -1,35 +1,57 @@
 package citedocs.Controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
 import citedocs.Entity.NotificationEntity;
 import citedocs.Service.NotificationService;
 
 @RestController
-@RequestMapping("/api/notification")
+@RequestMapping("/api/notifications")
+@CrossOrigin(origins = "http://localhost:3000")
 public class NotificationController {
 
-    @Autowired
-    NotificationService nserv;
+    private final NotificationService notificationService;
 
-    @PostMapping("/postNotification")
-    public NotificationEntity postNotification(@RequestBody NotificationEntity n) {
-        return nserv.postNotification(n);
+    public NotificationController(NotificationService notificationService) {
+        this.notificationService = notificationService;
     }
 
-    @GetMapping("/getAllNotifications")
-    public List<NotificationEntity> getAllNotifications() {
-        return nserv.getAllNotifications();
+    @PostMapping
+    public NotificationEntity create(@RequestBody NotificationEntity payload) {
+        return notificationService.create(payload);
     }
 
-    @PutMapping("/updateNotification")
-    public NotificationEntity updateNotification(@RequestParam int id, @RequestBody NotificationEntity newNotifDetails) {
-        return nserv.updateNotification(id, newNotifDetails);
+    @GetMapping
+    public List<NotificationEntity> findAll() {
+        return notificationService.findAll();
     }
 
-    @DeleteMapping("/deleteNotification/{id}")
-    public String deleteNotification(@PathVariable int id) {
-        return nserv.deleteNotification(id);
+    @GetMapping("/{id}")
+    public NotificationEntity findById(@PathVariable int id) {
+        return notificationService.findById(id);
+    }
+
+    @PutMapping("/{id}")
+    public NotificationEntity update(@PathVariable int id, @RequestBody NotificationEntity payload) {
+        return notificationService.update(id, payload);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable int id) {
+        notificationService.delete(id);
     }
 }
+

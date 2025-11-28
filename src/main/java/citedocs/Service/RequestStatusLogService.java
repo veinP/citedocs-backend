@@ -1,58 +1,51 @@
 package citedocs.Service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import citedocs.Entity.RequestStatusLogEntity;
+import citedocs.Exception.ResourceNotFoundException;
 import citedocs.Repository.RequestStatusLogRepository;
 
-@SuppressWarnings("null")
 @Service
+@Transactional
 public class RequestStatusLogService {
-    @Autowired
-    public RequestStatusLogRepository rrepo;
 
-    public RequestStatusLogEntity postRequestStatusLog(RequestStatusLogEntity log){
-        return rrepo.save(log);
+    private final RequestStatusLogRepository requestStatusLogRepository;
+
+    public RequestStatusLogService(RequestStatusLogRepository requestStatusLogRepository) {
+        this.requestStatusLogRepository = requestStatusLogRepository;
     }
 
-    public List<RequestStatusLogEntity>getAllRequestStatusLog(){
-        return rrepo.findAll();
+    public RequestStatusLogEntity create(RequestStatusLogEntity log) {
+        return requestStatusLogRepository.save(log);
     }
 
-    @SuppressWarnings("finally")
-    public RequestStatusLogEntity updateRequestStatusLog(int id, RequestStatusLogEntity newLogDetails){
-        RequestStatusLogEntity log = new RequestStatusLogEntity();
-
-        try{
-            log = rrepo.findById(id).get();
-
-            log.setRequestId(newLogDetails.getRequestId());
-            log.setOldStatus(newLogDetails.getOldStatus());
-            log.setNewStatus(newLogDetails.getNewStatus());
-            log.setChangeBy(newLogDetails.getChangeBy());
-            log.setChangedAt(newLogDetails.getChangedAt());
-        }
-        catch(NoSuchElementException ex){
-            throw new NoSuchElementException("Log " + id + " does not exist.");
-        }
-        finally{
-            return rrepo.save(log);
-        }   
+    @Transactional(readOnly = true)
+    public List<RequestStatusLogEntity> findAll() {
+        return requestStatusLogRepository.findAll();
     }
 
-    public String deleteRequestStatusLog(int id){
-        String msg = "";
-        if(rrepo.findById(id).isPresent()){
-            rrepo.deleteById(id);
-            msg = "Log" + id + " is successfully deleted!";
-        }
-        else{
-            msg = "Log" + id + " does not exist.";
-        }
-        return msg;
+    @Transactional(readOnly = true)
+    public RequestStatusLogEntity findById(int id) {
+        return requestStatusLogRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("RequestStatusLog", "id", id));
+    }
+
+    public RequestStatusLogEntity update(int id, RequestStatusLogEntity payload) {
+        RequestStatusLogEntity existing = findById(id);
+        existing.setRequestId(payload.getRequestId());
+        existing.setOldStatus(payload.getOldStatus());
+        existing.setNewStatus(payload.getNewStatus());
+        existing.setChangedBy(payload.getChangedBy());
+        return requestStatusLogRepository.save(existing);
+    }
+
+    public void delete(int id) {
+        RequestStatusLogEntity existing = findById(id);
+        requestStatusLogRepository.delete(existing);
     }
 }
+

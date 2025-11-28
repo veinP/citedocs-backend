@@ -12,13 +12,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
-enum Role {
-    REGISTRAR,
-    STUDENT,
-}
-
 @Entity
-@Table(name="Users")
+@Table(name="users")
 public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,6 +42,11 @@ public class UserEntity {
     @Column(name="created_at", nullable=false, updatable = false)
     private LocalDateTime createdAt;
 
+    public enum Role {
+        REGISTRAR,
+        STUDENT,
+    }
+
 
     public UserEntity() {
         super();
@@ -67,8 +67,12 @@ public class UserEntity {
         this.aid = aid;
     }
 
-    public int getUser_id() {
+    public int getUserId() {
         return uid;
+    }
+
+    public void setUserId(int uid) {
+        this.uid = uid;
     }
 
     public String getName() {
@@ -119,11 +123,11 @@ public class UserEntity {
         this.aid = aid;
     }
 
-    public LocalDateTime getCreated_at() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreated_at(LocalDateTime createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 

@@ -1,65 +1,52 @@
 package citedocs.Service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import citedocs.Entity.UserEntity;
+import citedocs.Exception.ResourceNotFoundException;
 import citedocs.Repository.UserRepository;
 
 @Service
+@Transactional
 public class UserService {
-    @Autowired
-    UserRepository urepo;
 
-    public UserService(UserRepository urepo){
-        this.urepo = urepo;
-    }
-    
-    //C
-    public UserEntity postUser(UserEntity user) {
-        return urepo.save(user);
+    private final UserRepository userRepository;
+
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
-    //R
-    public List<UserEntity> getAllUsers() {
-        return urepo.findAll();
+    public UserEntity create(UserEntity user) {
+        return userRepository.save(user);
     }
 
-    //U
-    @SuppressWarnings("finally")
-    public UserEntity updateUser(int uid, UserEntity newUserDetails) {
-        UserEntity user = new UserEntity();
-
-        try{
-            //search
-            user = urepo.findById(uid).get();
-
-            //update
-            user.setName(newUserDetails.getName());
-            user.setEmail(newUserDetails.getEmail());
-            user.setPassword(newUserDetails.getPassword());
-            user.setRole(newUserDetails.getRole());
-            user.setSid(newUserDetails.getSid());
-            user.setAid(newUserDetails.getAid());
-        }catch(NoSuchElementException e) {
-            throw new NoSuchElementException("User " + uid + " does not exist!");
-        }finally {
-            return urepo.save(user);
-        }
+    @Transactional(readOnly = true)
+    public List<UserEntity> findAll() {
+        return userRepository.findAll();
     }
-    //D
-    public String deleteUser(int uid) {
-        String msg = "";
 
-        if(urepo.findById(uid)!=null){
-            urepo.deleteById(uid);
-            msg = "User " + uid + " is successfully deleted!";
-        } else {
-            msg = "User " + uid + " does not exist!";
-        }
-        return msg;
+    @Transactional(readOnly = true)
+    public UserEntity findById(int id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+    }
+
+    public UserEntity update(int id, UserEntity payload) {
+        UserEntity existing = findById(id);
+        existing.setName(payload.getName());
+        existing.setEmail(payload.getEmail());
+        existing.setPassword(payload.getPassword());
+        existing.setRole(payload.getRole());
+        existing.setSid(payload.getSid());
+        existing.setAid(payload.getAid());
+        return userRepository.save(existing);
+    }
+
+    public void delete(int id) {
+        UserEntity existing = findById(id);
+        userRepository.delete(existing);
     }
 }

@@ -1,51 +1,57 @@
 package citedocs.Controller;
 
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import citedocs.Entity.RequestsEntity;
 import citedocs.Service.RequestsService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-
-import java.util.List;
-
 
 @RestController
 @RequestMapping("/api/requests")
-@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:3000")
 public class RequestsController {
 
+    private final RequestsService requestsService;
 
-@Autowired
-private RequestsService service;
+    public RequestsController(RequestsService requestsService) {
+        this.requestsService = requestsService;
+    }
 
+    @PostMapping
+    public RequestsEntity create(@RequestBody RequestsEntity payload) {
+        return requestsService.create(payload);
+    }
 
-@PostMapping("/postRequest")
-public RequestsEntity postRequest(@RequestParam Long documentId, @RequestBody RequestsEntity req) {
-return service.create(req, documentId);
+    @GetMapping
+    public List<RequestsEntity> findAll() {
+        return requestsService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public RequestsEntity findById(@PathVariable Long id) {
+        return requestsService.findById(id);
+    }
+
+    @PutMapping("/{id}")
+    public RequestsEntity update(@PathVariable Long id, @RequestBody RequestsEntity payload) {
+        return requestsService.update(id, payload);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
+        requestsService.delete(id);
+    }
 }
 
-
-@GetMapping("/getRequests")
-public List<RequestsEntity> getAllRequests() {
-return service.getAll();
-}
-
-
-@GetMapping("/getRequest")
-public RequestsEntity getRequest(@RequestParam Long id) {
-return service.getById(id);
-}
-
-
-@PutMapping("/putRequest")
-public RequestsEntity updateRequest(@RequestParam Long id, @RequestBody RequestsEntity req) {
-return service.update(id, req);
-}
-
-
-@DeleteMapping("/deleteRequest")
-public String deleteRequest(@RequestParam Long id) {
-return service.delete(id) ? "Request deleted successfully" : "Request not found";
-}
-}
