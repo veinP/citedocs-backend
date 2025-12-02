@@ -1,18 +1,13 @@
 package citedocs.Controller;
 
 import java.util.List;
+import java.util.Map;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import citedocs.Entity.UserEntity;
 import citedocs.Service.UserService;
@@ -28,30 +23,50 @@ public class UserController {
         this.userService = userService;
     }
 
+    // Create user
     @PostMapping
     public UserEntity create(@RequestBody UserEntity user) {
         return userService.create(user);
     }
 
+    // Get all users
     @GetMapping
     public List<UserEntity> findAll() {
         return userService.findAll();
     }
 
+    // Get user by ID
     @GetMapping("/{id}")
     public UserEntity findById(@PathVariable int id) {
         return userService.findById(id);
     }
 
+    // Update user
     @PutMapping("/{id}")
     public UserEntity update(@PathVariable int id, @RequestBody UserEntity payload) {
         return userService.update(id, payload);
     }
 
+    // Delete user
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable int id) {
         userService.delete(id);
     }
-}
 
+    @GetMapping("/me")
+    public ResponseEntity<?> me(HttpServletRequest request) {
+        Object userIdAttr = request.getAttribute("userId");
+        if (userIdAttr == null) {
+            return ResponseEntity.status(401).body(Map.of("message", "Unauthorized"));
+        }
+
+        Long userId = Long.parseLong(userIdAttr.toString());
+        UserEntity user = userService.findById(userId.intValue());
+        if (user == null) {
+            return ResponseEntity.status(404).body(Map.of("message", "User not found"));
+        }
+
+        return ResponseEntity.ok(user);
+    }
+}

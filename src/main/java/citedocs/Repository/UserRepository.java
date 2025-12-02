@@ -7,4 +7,8 @@ import citedocs.Entity.UserEntity;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Integer> {
+
+    UserEntity findByEmail(String email);
+    UserEntity findBySid(String sid);
+    UserEntity findByAid(String aid);
 }
