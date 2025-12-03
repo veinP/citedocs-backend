@@ -8,10 +8,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "Claim_Slips")
+@Table(name = "claim_slips")
 public class ClaimSlipEntity {
 
     @Id
@@ -19,33 +20,37 @@ public class ClaimSlipEntity {
     @Column(name = "claim_id")
     private int claimId;
 
-    @Column(name = "request_id", nullable = false)
-    private int requestId;
+    @Column(name = "request_id", nullable = false, unique = true)
+    private Long requestId;
 
-    @Column(name = "claim_number", nullable = false)
+    @Column(name = "claim_number", nullable = false, unique = true)
     private String claimNumber;
 
     @Column(name = "date_ready")
     private LocalDate dateReady;
 
     @Column(name = "issued_by")
-    private int issuedBy;
+    private Integer issuedBy;
 
     @Column(name = "issued_at")
     private LocalDateTime issuedAt;
 
-    public ClaimSlipEntity() {}
+    @PrePersist
+    protected void onIssue() {
+        if (issuedAt == null) {
+            issuedAt = LocalDateTime.now();
+        }
+    }
 
-    
     public int getClaimId() {
         return claimId;
     }
 
-    public int getRequestId() {
+    public Long getRequestId() {
         return requestId;
     }
 
-    public void setRequestId(int requestId) {
+    public void setRequestId(Long requestId) {
         this.requestId = requestId;
     }
 
@@ -65,11 +70,11 @@ public class ClaimSlipEntity {
         this.dateReady = dateReady;
     }
 
-    public int getIssuedBy() {
+    public Integer getIssuedBy() {
         return issuedBy;
     }
 
-    public void setIssuedBy(int issuedBy) {
+    public void setIssuedBy(Integer issuedBy) {
         this.issuedBy = issuedBy;
     }
 

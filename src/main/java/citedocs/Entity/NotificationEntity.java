@@ -1,7 +1,14 @@
 package citedocs.Entity;
 
-import jakarta.persistence.*;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "notifications")
@@ -11,24 +18,24 @@ public class NotificationEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int notificationId;
 
+    @Column(name = "user_id", nullable = false)
     private int userId;
+
+    @Column(name = "request_id", nullable = false)
     private int requestId;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String message;
 
+    @Column(name = "is_read")
     private boolean isRead;
-    private Timestamp createdAt;
 
-    public NotificationEntity() {}
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 
-    public NotificationEntity(int notificationId, int userId, int requestId, String message, boolean isRead, Timestamp createdAt) {
-        this.notificationId = notificationId;
-        this.userId = userId;
-        this.requestId = requestId;
-        this.message = message;
-        this.isRead = isRead;
-        this.createdAt = createdAt;
+    @PrePersist
+    private void onCreate() {
+        createdAt = LocalDateTime.now();
     }
 
     public int getNotificationId() {
@@ -71,12 +78,11 @@ public class NotificationEntity {
         this.isRead = isRead;
     }
 
-    public Timestamp getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 }
-

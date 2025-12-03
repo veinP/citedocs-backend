@@ -2,7 +2,8 @@ package citedocs.Controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,37 +11,47 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import citedocs.Entity.RequestStatusLogEntity;
 import citedocs.Service.RequestStatusLogService;
 
 @RestController
-@RequestMapping("/api/requeststatuslog")
-
+@RequestMapping("/api/request-status-logs")
+@CrossOrigin(origins = "http://localhost:3000")
 public class RequestStatusLogController {
-    @Autowired
-    public RequestStatusLogService rserv;
 
-    @PostMapping("/postRequestStatusLog")
-    public RequestStatusLogEntity postRequestStatusLogEntity(@RequestBody RequestStatusLogEntity log){
-        return rserv.postRequestStatusLog(log);
+    private final RequestStatusLogService requestStatusLogService;
+
+    public RequestStatusLogController(RequestStatusLogService requestStatusLogService) {
+        this.requestStatusLogService = requestStatusLogService;
     }
 
-    @GetMapping("/getRequestStatusLog")
-    public List<RequestStatusLogEntity>getAllRequestStatusLog(){
-        return rserv.getAllRequestStatusLog();
+    @PostMapping
+    public RequestStatusLogEntity create(@RequestBody RequestStatusLogEntity payload) {
+        return requestStatusLogService.create(payload);
     }
 
-    @PutMapping("/putRequestStatusLog")
-    public RequestStatusLogEntity updateRequestStatusLog(@RequestParam int id, @RequestBody RequestStatusLogEntity newLogDetails){
-        return rserv.updateRequestStatusLog(id, newLogDetails);
+    @GetMapping
+    public List<RequestStatusLogEntity> findAll() {
+        return requestStatusLogService.findAll();
     }
 
-    @DeleteMapping("/deleteRequestStatusLog")
-    public String deleteRequestStatusLog(@PathVariable int id){
-        return rserv.deleteRequestStatusLog(id);
+    @GetMapping("/{id}")
+    public RequestStatusLogEntity findById(@PathVariable int id) {
+        return requestStatusLogService.findById(id);
     }
 
+    @PutMapping("/{id}")
+    public RequestStatusLogEntity update(@PathVariable int id, @RequestBody RequestStatusLogEntity payload) {
+        return requestStatusLogService.update(id, payload);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable int id) {
+        requestStatusLogService.delete(id);
+    }
 }
+

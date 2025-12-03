@@ -1,60 +1,50 @@
 package citedocs.Service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import citedocs.Entity.PaymentEntity;
+import citedocs.Exception.ResourceNotFoundException;
 import citedocs.Repository.PaymentRepository;
 
 @Service
+@Transactional
 public class PaymentService {
 
-    @Autowired
-    private PaymentRepository prepo;
+    private final PaymentRepository paymentRepository;
 
-    public PaymentService(PaymentRepository prepo){
-        this.prepo = prepo;
+    public PaymentService(PaymentRepository paymentRepository) {
+        this.paymentRepository = paymentRepository;
     }
 
-    // C
-    public PaymentEntity postPayment(PaymentEntity payment) {
-        return prepo.save(payment);
+    public PaymentEntity create(PaymentEntity payment) {
+        return paymentRepository.save(payment);
     }
 
-    // R
-    public List<PaymentEntity> getAllPayments() {
-        return prepo.findAll();
+    @Transactional(readOnly = true)
+    public List<PaymentEntity> findAll() {
+        return paymentRepository.findAll();
     }
 
-    // U
-    @SuppressWarnings("finally")
-    public PaymentEntity updatePayment(int pid, PaymentEntity newDetails) {
-        PaymentEntity payment = new PaymentEntity();
-
-        try {
-            payment = prepo.findById(pid)
-                .orElseThrow(() -> new NoSuchElementException("Payment " + pid + " does not exist!"));
-
-            payment.setRid(newDetails.getRid());
-            payment.setProofOfPayment(newDetails.getProofOfPayment());
-            payment.setRemarks(newDetails.getRemarks());
-
-        } catch (NoSuchElementException e) {
-            throw e;
-        } finally {
-            return prepo.save(payment);
-        }
+    @Transactional(readOnly = true)
+    public PaymentEntity findById(int id) {
+        return paymentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Payment", "id", id));
     }
-    // D
-    public String deletePayment(int pid) {
-        if (prepo.existsById(pid)) {
-            prepo.deleteById(pid);
-            return "Payment " + pid + " is successfully deleted!";
-        } else {
-            return "Payment " + pid + " does not exist!";
-        }
+
+    public PaymentEntity update(int id, PaymentEntity payload) {
+        PaymentEntity existing = findById(id);
+        existing.setRequestId(payload.getRequestId());
+        existing.setProofOfPayment(payload.getProofOfPayment());
+        existing.setRemarks(payload.getRemarks());
+        return paymentRepository.save(existing);
+    }
+
+    public void delete(int id) {
+        PaymentEntity existing = findById(id);
+        paymentRepository.delete(existing);
     }
 }
+

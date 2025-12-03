@@ -1,51 +1,57 @@
 package citedocs.Controller;
 
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import citedocs.Entity.DocumentsEntity;
 import citedocs.Service.DocumentsService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-
-import java.util.List;
-
 
 @RestController
 @RequestMapping("/api/documents")
-@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:3000")
 public class DocumentsController {
 
+    private final DocumentsService documentsService;
 
-@Autowired
-private DocumentsService service;
+    public DocumentsController(DocumentsService documentsService) {
+        this.documentsService = documentsService;
+    }
 
+    @PostMapping
+    public DocumentsEntity create(@RequestBody DocumentsEntity payload) {
+        return documentsService.create(payload);
+    }
 
-@PostMapping("/postDocument")
-public DocumentsEntity postDocument(@RequestBody DocumentsEntity doc) {
-return service.create(doc);
+    @GetMapping
+    public List<DocumentsEntity> findAll() {
+        return documentsService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public DocumentsEntity findById(@PathVariable Long id) {
+        return documentsService.findById(id);
+    }
+
+    @PutMapping("/{id}")
+    public DocumentsEntity update(@PathVariable Long id, @RequestBody DocumentsEntity payload) {
+        return documentsService.update(id, payload);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
+        documentsService.delete(id);
+    }
 }
 
-
-@GetMapping("/getDocuments")
-public List<DocumentsEntity> getAllDocuments() {
-return service.getAll();
-}
-
-
-@GetMapping("/getDocument")
-public DocumentsEntity getDocument(@RequestParam Long id) {
-return service.getById(id);
-}
-
-
-@PutMapping("/putDocument")
-public DocumentsEntity updateDocument(@RequestParam Long id, @RequestBody DocumentsEntity doc) {
-return service.update(id, doc);
-}
-
-
-@DeleteMapping("/deleteDocument")
-public String deleteDocument(@RequestParam Long id) {
-return service.delete(id) ? "Document deleted successfully" : "Document not found";
-}
-}

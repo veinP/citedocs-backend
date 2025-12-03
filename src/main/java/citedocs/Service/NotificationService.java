@@ -1,58 +1,51 @@
 package citedocs.Service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import citedocs.Entity.NotificationEntity;
+import citedocs.Exception.ResourceNotFoundException;
 import citedocs.Repository.NotificationRepository;
 
-@SuppressWarnings("null")
 @Service
+@Transactional
 public class NotificationService {
 
-    @Autowired
-    NotificationRepository nrepo;
+    private final NotificationRepository notificationRepository;
 
-    public NotificationEntity postNotification(NotificationEntity n) {
-        return nrepo.save(n);
+    public NotificationService(NotificationRepository notificationRepository) {
+        this.notificationRepository = notificationRepository;
     }
 
-    public List<NotificationEntity> getAllNotifications() {
-        return nrepo.findAll();
+    public NotificationEntity create(NotificationEntity notification) {
+        return notificationRepository.save(notification);
     }
 
-    @SuppressWarnings("finally")
-    public NotificationEntity updateNotification(int id, NotificationEntity newNotifDetails) {
-        NotificationEntity notif = new NotificationEntity();
-
-        try {
-            notif = nrepo.findById(id).get();
-
-            notif.setUserId(newNotifDetails.getUserId());
-            notif.setRequestId(newNotifDetails.getRequestId());
-            notif.setMessage(newNotifDetails.getMessage());
-            notif.setIsRead(newNotifDetails.getIsRead());
-            notif.setCreatedAt(newNotifDetails.getCreatedAt());
-
-        } catch (NoSuchElementException ex) {
-            throw new NoSuchElementException("Notification " + id + " does not exist.");
-        } finally {
-            return nrepo.save(notif);
-        }
+    @Transactional(readOnly = true)
+    public List<NotificationEntity> findAll() {
+        return notificationRepository.findAll();
     }
 
-    public String deleteNotification(int id) {
-        String msg = "";
-        if (nrepo.findById(id).isPresent()) {
-            nrepo.deleteById(id);
-            msg = "Notification " + id + " is successfully deleted!";
-        } else {
-            msg = "Notification " + id + " does not exist.";
-        }
-        return msg;
+    @Transactional(readOnly = true)
+    public NotificationEntity findById(int id) {
+        return notificationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Notification", "id", id));
+    }
+
+    public NotificationEntity update(int id, NotificationEntity payload) {
+        NotificationEntity existing = findById(id);
+        existing.setUserId(payload.getUserId());
+        existing.setRequestId(payload.getRequestId());
+        existing.setMessage(payload.getMessage());
+        existing.setIsRead(payload.getIsRead());
+        return notificationRepository.save(existing);
+    }
+
+    public void delete(int id) {
+        NotificationEntity existing = findById(id);
+        notificationRepository.delete(existing);
     }
 }
 
